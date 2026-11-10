@@ -1,16 +1,15 @@
 import { useRef, useState } from 'react';
 import TextInputWithLabel from '../shared/TextInputWithLabel.jsx';
+import { isValidTodoTitle } from '../utils/todoValidation';
 
 function TodoForm({ onAddTodo }) {
   const inputRef = useRef();
-  // switched this to a controlled input - React now owns what's
-  // typed in the box instead of me reading it off the DOM on submit
   const [workingTodoTitle, setWorkingTodoTitle] = useState('');
 
   const handleAddTodo = (event) => {
     event.preventDefault();
 
-    if (workingTodoTitle.trim()) {
+    if (isValidTodoTitle(workingTodoTitle)) {
       onAddTodo(workingTodoTitle);
       setWorkingTodoTitle('');
       inputRef.current.focus();
@@ -26,8 +25,7 @@ function TodoForm({ onAddTodo }) {
         value={workingTodoTitle}
         onChange={(event) => setWorkingTodoTitle(event.target.value)}
       />
-      {/* disables the button when there's nothing but whitespace typed in */}
-      <button type="submit" disabled={!workingTodoTitle.trim()}>
+      <button type="submit" disabled={!isValidTodoTitle(workingTodoTitle)}>
         Add Todo
       </button>
     </form>
