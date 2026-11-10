@@ -1,14 +1,65 @@
-function TodoListItem({ todo, onCompleteTodo }) {
+import { useState } from 'react';
+import TextInputWithLabel from '../../shared/TextInputWithLabel.jsx';
+import { isValidTodoTitle } from '../../utils/todoValidation';
+
+function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [workingTitle, setWorkingTitle] = useState(todo.title);
+
+  function handleEdit(event) {
+    setWorkingTitle(event.target.value);
+  }
+
+  function handleCancel() {
+    setWorkingTitle(todo.title);
+    setIsEditing(false);
+  }
+
+  function handleUpdate(event) {
+    if (!isEditing) return;
+    event.preventDefault();
+    onUpdateTodo({ ...todo, title: workingTitle });
+    setIsEditing(false);
+  }
+
   return (
     <li>
-      {/* checkbox stays in sync with todo.isCompleted - checking it
-          calls back up to App so the real state updates */}
-      <input
-        type="checkbox"
-        checked={todo.isCompleted}
-        onChange={() => onCompleteTodo(todo.id)}
-      />
-      {todo.title}
+      <form onSubmit={handleUpdate}>
+        {isEditing ? (
+          <TextInputWithLabel
+            elementId={`todoTitle${todo.id}`}
+            labelText="Edit Todo"
+            value={workingTitle}
+            onChange={handleEdit}
+          />
+        ) : (
+          <>
+            <label>
+              <input
+                type="checkbox"
+                id={`checkbox${todo.id}`}
+                checked={todo.isCompleted}
+                onChange={() => onCompleteTodo(todo.id)}
+              />
+            </label>
+            <span onClick={() => setIsEditing(true)}>{todo.title}</span>
+          </>
+        )}
+        {isEditing && (
+          <>
+            <button type="button" onClick={handleCancel}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleUpdate}
+              disabled={!isValidTodoTitle(workingTitle)}
+            >
+              Update
+            </button>
+          </>
+        )}
+      </form>
     </li>
   );
 }
